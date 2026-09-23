@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projectile Ring Challenge: Makeup Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF1F3; --card:#FFFFFF; --ink:#141E26; --ink-2:#4C5A66;
+  --rule:#C6D0D8; --rule-2:#E0E6EA;
+  --bench:#0F1820; --bench-grid:#243441; --bench-ink:#8FA3B2; --bench-rule:#33475A;
+  --brass:#A8761A; --brass-lite:#C9922B; --pass:#0C8073; --clip:#B07A10; --miss:#BE2F49;
+  --focus:#1F6FEB;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0B1116; --card:#131C24; --ink:#E3EAEF; --ink-2:#94A6B3;
+    --rule:#2C3B47; --rule-2:#1E2A34;
+    --bench:#070C11; --bench-grid:#1B2833; --bench-ink:#7E93A3; --bench-rule:#2A3B4A;
+    --brass:#DCA83C; --brass-lite:#DCA83C; --pass:#25A392; --clip:#C9922B; --miss:#E05672;
+    --focus:#5B9BFF;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  font-size:16px; line-height:1.55; -webkit-text-size-adjust:100%}
+.wrap{max-width:1000px; margin:0 auto; padding:28px 20px 80px}
+h1{font-size:clamp(1.6rem,1.1rem + 1.8vw,2.3rem); line-height:1.12; margin:0 0 8px; font-weight:600; letter-spacing:-.015em}
+h2{font-size:1.25rem; margin:0 0 4px; font-weight:600; display:flex; gap:12px; align-items:baseline; flex-wrap:wrap}
+h2 .pts{font-size:.85rem; font-weight:500; color:var(--ink-2)}
+h2 .letter{font-family:"IBM Plex Mono",monospace; color:var(--brass)}
+p{margin:.5em 0; max-width:72ch}
+.lede{color:var(--ink-2); max-width:64ch}
+.credit{font-size:.82rem; color:var(--ink-2)}
+section{margin-top:40px; padding-top:22px; border-top:1px solid var(--rule)}
+.card{background:var(--card); border:1px solid var(--rule); border-radius:3px; padding:16px 18px}
+.idrow{display:flex; flex-wrap:wrap; gap:16px 28px; align-items:flex-end; margin-top:22px}
+label.f{display:flex; flex-direction:column; gap:4px; font-size:.85rem; color:var(--ink-2)}
+input[type=text], select, textarea, input[type=number]{
+  font:inherit; color:var(--ink); background:var(--paper);
+  border:1px solid var(--rule); border-radius:3px; padding:7px 10px}
+input[type=text]{min-width:16rem}
+textarea{width:100%; min-height:7.5em; resize:vertical; line-height:1.5}
+input[type=number]{font-family:"IBM Plex Mono",monospace; width:9ch; text-align:right; padding:5px 8px; font-variant-numeric:tabular-nums}
+input:disabled, textarea:disabled{opacity:.7}
+.code{font-family:"IBM Plex Mono",monospace; font-size:1.5rem; font-weight:600; letter-spacing:.12em; color:var(--brass)}
+.given{display:flex; flex-wrap:wrap; gap:10px 30px; align-items:baseline; margin-top:14px}
+.given div{display:flex; gap:9px; align-items:baseline; white-space:nowrap}
+.given span{color:var(--ink-2); font-size:.82rem}
+.given b{font-family:"IBM Plex Mono",monospace; font-weight:500; font-size:1.02rem; font-variant-numeric:tabular-nums}
+.mine{margin-top:12px; font-size:.95rem}
+.mine b{color:var(--brass)}
+ul.rules{margin:.4em 0; padding-left:1.2em; max-width:72ch}
+details{margin-top:10px; max-width:72ch}
+summary{cursor:pointer; color:var(--brass); font-weight:500}
+.paper{border-left:3px solid var(--brass-lite); padding:6px 0 6px 14px; margin:12px 0; max-width:70ch}
+.btable{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 16px; align-items:center; max-width:560px; margin-top:12px}
+.btable span{font-size:.93rem}
+.btable .u{font-size:.85rem; color:var(--ink-2); margin-left:6px}
+.range{margin:18px 0 0; background:var(--bench); border:1px solid var(--bench-rule); border-radius:3px; overflow-x:auto; overflow-y:hidden}
+.range svg{display:block; width:100%; min-width:560px; height:auto; touch-action:none}
+.bar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:16px 0 22px}
+button{font:inherit; font-weight:500; padding:9px 18px; border-radius:3px; cursor:pointer;
+  border:1px solid var(--rule); background:var(--card); color:var(--ink)}
+button:hover:not(:disabled){border-color:var(--ink-2)}
+button.primary{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+button:disabled{opacity:.45; cursor:not-allowed}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.verdict{font-family:"IBM Plex Mono",monospace; font-size:.9rem; color:var(--ink-2)}
+.tablewrap{overflow-x:auto}
+table{width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--rule)}
+caption{text-align:left; padding:0 0 8px; color:var(--ink-2); font-size:.88rem}
+th,td{padding:8px 12px; border-bottom:1px solid var(--rule-2); text-align:right; font-variant-numeric:tabular-nums}
+th{font-size:.78rem; font-weight:600; color:var(--ink-2); border-bottom:1px solid var(--rule)}
+th:first-child,td:first-child{text-align:left}
+tbody tr:last-child td{border-bottom:none}
+td.num{font-family:"IBM Plex Mono",monospace}
+tr.minerow td:first-child{color:var(--brass); font-weight:600}
+.tag{font-size:.82rem; font-weight:600}
+.t-pass{color:var(--pass)} .t-clip{color:var(--clip)} .t-miss{color:var(--miss)}
+.note{margin-top:14px; color:var(--ink-2); font-size:.88rem; max-width:72ch}
+.q{margin-top:20px}
+.q p{margin:.2em 0 .6em}
+.q b{font-family:"IBM Plex Mono",monospace; color:var(--brass)}
+.msg{margin-top:12px; font-size:.92rem; max-width:72ch}
+.msg.err{color:var(--miss)}
+.msg.ok{color:var(--pass)}
+#summaryBox{font-family:"IBM Plex Mono",monospace; font-size:.82rem; min-height:14em; margin-top:10px}
+.saved{font-size:.8rem; color:var(--ink-2)}
+@media (max-width:640px){
+  .wrap{padding:20px 14px 60px}
+  th,td{padding:7px 8px; font-size:.9rem}
+  input[type=text]{min-width:0; width:100%}
+  .idrow label.f{width:100%}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Projectile Ring Challenge: makeup lab</h1>
+  <p class="lede">You missed the ring launch in class, so you get your own launcher. Work out how high nine rings must sit for a marble to pass through all of them, set them, and fire once. There are no practice shots.</p>
+  <p class="credit">Mr. Comella · AP Physics C: Mechanics · Scripps Ranch High School. Adapted from C. Jordan, A. Dunn, Z. Armstrong &amp; W. K. Adams, “Projectile Motion Hoop Challenge,” <i>The Physics Teacher</i> 56, 200–202 (2018).</p>
+</header>
+
+<div class="idrow">
+  <label class="f">Your full name
+    <input type="text" id="name" autocomplete="name" placeholder="First Last">
+  </label>
+  <label class="f">Period
+    <select id="period"><option value="">Choose</option><option>P2</option><option>P4</option><option>Other</option></select>
+  </label>
+  <div>
+    <div style="font-size:.85rem;color:var(--ink-2)">Your problem code</div>
+    <div class="code" id="code">······</div>
+  </div>
+</div>
+<p class="note">Your numbers are different from everyone else’s. <b>Write your problem code at the top of your paper work.</b> This page saves your progress in this browser, so use the same device and browser until you turn it in. <span class="saved" id="saved"></span></p>
+
+<section>
+  <h2>Given information</h2>
+  <div class="card">
+    <div class="given" id="given" style="margin-top:0"></div>
+    <p class="mine" id="mineLine"></p>
+  </div>
+  <ul class="rules">
+    <li>All heights are measured from the <b>tabletop</b> to the <b>center of the ring</b>, not from the floor.</li>
+    <li>All horizontal distances are measured from the muzzle opening, along the bench.</li>
+    <li>The launcher is calibrated. Trust v₀; don’t try to measure it.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="letter">A</span> Derive the trajectory equation <span class="pts">12 points · on paper</span></h2>
+  <p>Before you touch a number, derive a general expression for the marble’s height above the tabletop as a function of horizontal distance from the muzzle. Your result must be symbolic, written entirely in terms of v₀, θ, h₀, g, and x.</p>
+  <p>Start from the two independent parametric equations of motion, one for each direction. Eliminate t and solve for y(x). Show every algebraic step. A correct answer with no derivation earns no credit.</p>
+  <details>
+    <summary>Stuck? Open a hint</summary>
+    <p>Write x(t) for the horizontal direction. There is no horizontal acceleration, so that equation solves for t in one step. Substitute that expression for t into your vertical equation. Every t disappears and you are left with y in terms of x alone.</p>
+  </details>
+</section>
+
+<section>
+  <h2><span class="letter">B</span> Compute your station’s ring height <span class="pts">16 points · work on paper, results here</span></h2>
+  <p id="bIntro">Use your Part A result to calculate the ring height at your assigned station. Show the substitution with units on paper and report the height to the nearest 0.1 cm.</p>
+  <p>Then check it a second, independent way: find the time of flight to your station and use it to compute the height again. If the two methods disagree, find the error before you go on. You do not get a second launch.</p>
+  <div class="btable" id="btable">
+    <span>Horizontal velocity component, v₀ₓ</span><span><input type="number" step="any" data-b="vx" aria-label="v0x in meters per second"><span class="u">m/s</span></span>
+    <span>Vertical velocity component, v₀ᵧ</span><span><input type="number" step="any" data-b="vy" aria-label="v0y in meters per second"><span class="u">m/s</span></span>
+    <span>Time of flight to my station, t</span><span><input type="number" step="any" data-b="t" aria-label="time of flight in seconds"><span class="u">s</span></span>
+    <span>Ring height, Method 1 (y(x) equation)</span><span><input type="number" step="any" data-b="m1" aria-label="Method 1 height in meters"><span class="u">m</span></span>
+    <span>Ring height, Method 2 (time of flight)</span><span><input type="number" step="any" data-b="m2" aria-label="Method 2 height in meters"><span class="u">m</span></span>
+  </div>
+</section>
+
+<section>
+  <h2><span class="letter">C</span> Set all nine rings <span class="pts">4 points</span></h2>
+  <p>In class, each group set one ring. You are setting all nine. Once your equation from Part A is right, you may use a calculator, Desmos, or a spreadsheet to get the other eight heights. Type each height in centimeters. Your assigned station should match your Part B answer.</p>
+  <div class="range"><svg id="scene" role="img" aria-label="Side view of the launcher, the bench, and nine ring stands"></svg></div>
+  <div class="bar">
+    <button id="launch" class="primary">Launch</button>
+    <span class="verdict" id="verdict">Enter all nine heights, then launch.</span>
+  </div>
+  <div class="tablewrap">
+  <table>
+    <caption>Ring height is measured from the tabletop to the center of the ring. You can also drag a ring up or down in the picture to set it roughly.</caption>
+    <thead><tr><th>Station</th><th>Distance (m)</th><th>Your ring height (cm)</th><th>Result</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  </div>
+  <p class="note">The rings are 12 cm across. The marble passes cleanly if a ring is within 4.5 cm of the right height and clips the rim out to 6.0 cm.</p>
+</section>
+
+<section>
+  <h2><span class="letter">D</span> Launch <span class="pts">10 points</span></h2>
+  <p>When all nine rings are set, press <b>Launch</b>. You get one launch. After it fires, your ring heights and Part B answers lock, and your results are scored from that one shot.</p>
+  <p class="msg" id="dMsg"></p>
+</section>
+
+<section>
+  <h2><span class="letter">E</span> Analysis <span class="pts">8 points</span></h2>
+  <div class="q">
+    <p><b>E1.</b> Suppose the launcher actually fired 5% faster than the given v₀. Would the rings need to move up or down? Which station would need to move the most, and why? Use the terms in your Part A equation to explain.</p>
+    <textarea data-e="e1" aria-label="Answer to E1"></textarea>
+  </div>
+  <div class="q">
+    <p><b>E2.</b> Find the horizontal distance where your marble reaches its highest point. Which two stations have ring heights closest to each other? Explain why, using the shape of the trajectory, even though they are at very different distances.</p>
+    <textarea data-e="e2" aria-label="Answer to E2"></textarea>
+  </div>
+  <div class="q">
+    <p><b>E3.</b> These rings are mounted vertically, facing the launcher. Suppose a ring were mounted flat instead, like a basketball hoop. Using the marble’s velocity vector, explain why a flat ring near the apex could never work but one at station 9 might. Estimate the marble’s direction of motion at station 9 as an angle below horizontal.</p>
+    <textarea data-e="e3" aria-label="Answer to E3"></textarea>
+  </div>
+</section>
+
+<section>
+  <h2>Turn it in</h2>
+  <p>Press <b>Send to Google Form</b>. A form opens with your name, code, and results already filled in. In that form, also upload clear photos of your Part A and Part B work on paper, then submit.</p>
+  <div class="bar">
+    <button id="send" class="primary">Send to Google Form</button>
+    <button id="copy">Copy my results</button>
+  </div>
+  <p class="msg" id="sendMsg"></p>
+  <details id="summaryWrap">
+    <summary>Show what will be sent</summary>
+    <textarea id="summaryBox" readonly aria-label="Results summary"></textarea>
+  </details>
+</section>
+
+<script>
+/* ============ TEACHER SETUP ============
+   1. Make a Google Form with these questions:
+        Name (short answer) · Period (short answer) · Problem code (short answer)
+        Results (paragraph) · Analysis (paragraph) · Photos of Parts A and B (file upload)
+   2. In the form editor: ⋮ menu → "Get pre-filled link". Type NAME, PERIOD, CODE, RESULTS,
+      ANALYSIS into the five text questions, click "Get link", and copy it.
+   3. Paste the part before "?" into url, and each entry number into entries below.
+      Example link: https://docs.google.com/forms/d/e/1FAIpQ.../viewform?usp=pp_url&entry.123456=NAME&...
+*/
+const FORM = {
+  url: "",                 // e.g. "https://docs.google.com/forms/d/e/1FAIpQ.../viewform"
+  entries: {               // e.g. name: "entry.123456"
+    name: "", period: "", code: "", results: "", analysis: ""
+  }
+};
+/* ======================================= */
+</script>
+
+<script>
+(function(){
+"use strict";
+/* ---- shared problem generator: identical in student page and teacher check ---- */
+const ALPH = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const G = 9.81, RING_R = 0.06, CLEAN = 0.045, N = 9;
+const rd = (v,n) => Math.round(v*Math.pow(10,n))/Math.pow(10,n);
+function newCode(){
+  const a = new Uint32Array(6); crypto.getRandomValues(a);
+  let s = ""; for (const v of a) s += ALPH[v % ALPH.length]; return s;
+}
+function normCode(c){ return (c||"").toUpperCase().replace(/[^A-Z0-9]/g,""); }
+function validCode(c){ return c.length === 6 && [...c].every(ch => ALPH.includes(ch)); }
+function seedFrom(code){
+  let h = 2166136261 >>> 0;
+  for (const ch of "PRC1:" + code){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  return h;
+}
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function makeProblem(code){
+  const rng = mulberry32(seedFrom(code));
+  const rnd = (a,b) => a + rng()*(b-a);
+  const thetaDeg = rd(rnd(30,60),1);
+  const th = thetaDeg*Math.PI/180;
+  const h0 = rd(rnd(0.10,0.30),3);
+  // cap the apex at 1.15 m so every ring stays inside real ring-stand range
+  const vMax = Math.min(7.0, Math.sqrt(2*G*(1.15-h0))/Math.sin(th));
+  const v0 = rd(rnd(4.0,vMax),2);
+  const vx = v0*Math.cos(th), vy = v0*Math.sin(th);
+  const tLand = (vy + Math.sqrt(vy*vy + 2*G*h0))/G;
+  const xLand = vx*tLand;
+  const y = (x) => h0 + x*Math.tan(th) - G*x*x/(2*v0*v0*Math.cos(th)*Math.cos(th));
+  const xs = []; for (let i=0;i<N;i++) xs.push(rd(xLand*(0.10 + i*0.10),2));
+  const mine = 1 + Math.floor(rng()*7);          // array index 1..7 = stations 2..8
+  return { code, thetaDeg, th, v0, h0, vx, vy, tLand, xLand, y, xs,
+           targets: xs.map(y), apexX: vx*vy/G, apexY: h0 + vy*vy/(2*G), mine };
+}
+function grade(h, target){
+  const e = Math.abs(h - target);
+  return e <= CLEAN ? "pass" : e <= RING_R ? "clip" : "miss";
+}
+
+
+const KEY = "prc-makeup-v1";
+const $ = (id) => document.getElementById(id);
+
+/* ---------- state ---------- */
+let S = load();
+if (!S || !validCode(S.code)){
+  S = { code:newCode(), name:"", period:"", heights:new Array(N).fill(null),
+        b:{}, e:{}, launched:false, status:null, launchedAt:null };
+  save();
+}
+const P = makeProblem(S.code);
+let anim = null;
+
+function load(){ try { return JSON.parse(localStorage.getItem(KEY)); } catch(e){ return null; } }
+function save(){
+  try {
+    localStorage.setItem(KEY, JSON.stringify(S));
+    $("saved").textContent = "Progress saved.";
+  } catch(e){
+    $("saved").textContent = "This browser isn’t saving your progress, so finish in one sitting.";
+  }
+}
+
+/* ---------- header ---------- */
+$("code").textContent = S.code;
+$("name").value = S.name || "";
+$("period").value = S.period || "";
+$("name").addEventListener("input", ()=>{ S.name = $("name").value; save(); });
+$("period").addEventListener("change", ()=>{ S.period = $("period").value; save(); });
+
+function g(k,v){ return "<div><span>"+k+"</span><b>"+v+"</b></div>"; }
+$("given").innerHTML =
+  g("Muzzle speed v\u2080", P.v0.toFixed(2)+" m/s") +
+  g("Launch angle \u03b8", P.thetaDeg.toFixed(1)+"\u00b0") +
+  g("Muzzle height h\u2080", P.h0.toFixed(3)+" m") +
+  g("g", "9.81 m/s\u00b2");
+$("mineLine").innerHTML = "Your assigned station for Part B: <b>station "+(P.mine+1)+", x = "+P.xs[P.mine].toFixed(2)+" m</b>";
+
+/* ---------- Part B ---------- */
+document.querySelectorAll("[data-b]").forEach(inp=>{
+  const k = inp.dataset.b;
+  if (S.b[k] != null) inp.value = S.b[k];
+  inp.addEventListener("input", ()=>{ S.b[k] = inp.value; save(); });
+});
+
+/* ---------- Part E ---------- */
+document.querySelectorAll("[data-e]").forEach(ta=>{
+  const k = ta.dataset.e;
+  if (S.e[k] != null) ta.value = S.e[k];
+  ta.addEventListener("input", ()=>{ S.e[k] = ta.value; save(); });
+});
+
+/* ---------- table ---------- */
+function drawRows(){
+  const tb = $("rows"); tb.innerHTML = "";
+  P.xs.forEach((x,i)=>{
+    const tr = document.createElement("tr");
+    if (i === P.mine) tr.className = "minerow";
+    tr.innerHTML =
+      "<td>"+(i+1)+(i===P.mine?" (yours)":"")+"</td>"+
+      "<td class='num'>"+x.toFixed(2)+"</td>"+
+      "<td><input type='number' step='0.1' min='0' max='200' inputmode='decimal' "+
+        "aria-label='Ring height for station "+(i+1)+" in centimeters' data-i='"+i+"'></td>"+
+      "<td id='res"+i+"'></td>";
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll("input").forEach(inp=>{
+    const i = +inp.dataset.i;
+    if (S.heights[i] != null) inp.value = (S.heights[i]*100).toFixed(1);
+    inp.addEventListener("input", ()=>{
+      const v = parseFloat(inp.value);
+      S.heights[i] = (isFinite(v) && v >= 0 && v <= 200) ? rd(v/100,4) : null;
+      save(); draw();
+    });
+  });
+}
+
+/* ---------- scene ---------- */
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+let VIEW = null;
+function computeView(){
+  const xMin = -0.30, xMax = P.xLand*1.06;
+  const hs = S.heights.filter(v=>v!=null);
+  const W = (xMax-xMin)*100, fs = Math.max(4, 12*W/880);
+  const yMin = -fs*3.4/100, yMax = Math.max(P.apexY, 0.6, ...hs) + 0.22;
+  VIEW = {xMin,xMax,yMin,yMax, W, H:(yMax-yMin)*100, fs};
+}
+const SX = (x)=> (x-VIEW.xMin)*100;
+const SY = (y)=> (VIEW.yMax-y)*100;
+
+function draw(){
+  computeView();
+  const s = $("scene");
+  s.setAttribute("viewBox","0 0 "+VIEW.W.toFixed(1)+" "+VIEW.H.toFixed(1));
+  while (s.firstChild) s.removeChild(s.firstChild);
+  const k = VIEW.fs/12, fs = VIEW.fs;
+  const gr = el("g",{});
+  for (let x=0; x<=VIEW.xMax; x+=0.25) gr.appendChild(el("line",{x1:SX(x),y1:SY(VIEW.yMax),x2:SX(x),y2:SY(VIEW.yMin),stroke:"var(--bench-grid)","stroke-width":(Math.abs(x-Math.round(x))<1e-9?1.2:0.6)*k}));
+  for (let y=0; y<=VIEW.yMax; y+=0.25) gr.appendChild(el("line",{x1:SX(VIEW.xMin),y1:SY(y),x2:SX(VIEW.xMax),y2:SY(y),stroke:"var(--bench-grid)","stroke-width":(Math.abs(y-Math.round(y))<1e-9?1.2:0.6)*k}));
+  s.appendChild(gr);
+  for (let x=0.5; x<=VIEW.xMax; x+=0.5){ const t = el("text",{x:SX(x),y:SY(0)+fs*2.9,fill:"var(--bench-ink)","font-size":fs*0.85,"text-anchor":"middle","font-family":"IBM Plex Mono, monospace"}); t.textContent = x.toFixed(1)+" m"; s.appendChild(t); }
+  for (let y=0.5; y<=VIEW.yMax; y+=0.5){ const t = el("text",{x:SX(VIEW.xMin)+fs*0.4,y:SY(y)-fs*0.3,fill:"var(--bench-ink)","font-size":fs*0.85,"font-family":"IBM Plex Mono, monospace"}); t.textContent = y.toFixed(1)+" m"; s.appendChild(t); }
+  s.appendChild(el("line",{x1:SX(VIEW.xMin),y1:SY(0),x2:SX(VIEW.xMax),y2:SY(0),stroke:"var(--bench-rule)","stroke-width":3*k}));
+  const bx = 0.22*Math.cos(P.th), by = 0.22*Math.sin(P.th);
+  s.appendChild(el("line",{x1:SX(-bx),y1:SY(P.h0-by),x2:SX(0),y2:SY(P.h0),stroke:"var(--brass-lite)","stroke-width":6*k,"stroke-linecap":"round"}));
+  s.appendChild(el("line",{x1:SX(-bx*0.5),y1:SY(P.h0-by*0.5),x2:SX(-bx*0.5),y2:SY(0),stroke:"var(--bench-rule)","stroke-width":3*k}));
+
+  P.xs.forEach((x,i)=>{
+    const h = S.heights[i];
+    const grp = el("g",{"data-i":i,style:S.launched?"":"cursor:ns-resize"});
+    grp.appendChild(el("rect",{x:SX(x)-fs*0.6,y:SY(0),width:fs*1.2,height:fs*0.3,fill:"var(--bench-rule)"}));
+    const top = (h!=null ? h : 0.35) + 0.10;
+    grp.appendChild(el("line",{x1:SX(x),y1:SY(0),x2:SX(x),y2:SY(top),stroke:"var(--bench-rule)","stroke-width":2.5*k}));
+    if (h != null){
+      const st = S.launched && S.status ? S.status[i] : null;
+      const col = st==="pass"?"var(--pass)":st==="clip"?"var(--clip)":st==="miss"?"var(--miss)":"var(--bench-ink)";
+      grp.appendChild(el("ellipse",{cx:SX(x),cy:SY(h),rx:Math.min(2.6,5*k),ry:RING_R*100,fill:"none",stroke:col,"stroke-width":2.6*k}));
+      grp.appendChild(el("line",{x1:SX(x)-10*k,y1:SY(h),x2:SX(x)-Math.min(2.6,5*k),y2:SY(h),stroke:"var(--bench-rule)","stroke-width":2*k}));
+    }
+    const lab = el("text",{x:SX(x),y:SY(0)+fs*1.5,fill:i===P.mine?"var(--brass-lite)":"var(--bench-ink)","font-size":fs,"font-weight":i===P.mine?700:400,"text-anchor":"middle","font-family":"IBM Plex Mono, monospace"});
+    lab.textContent = i+1; grp.appendChild(lab);
+    grp.appendChild(el("rect",{x:SX(x)-12*k,y:SY(VIEW.yMax),width:24*k,height:VIEW.H,fill:"transparent"}));
+    s.appendChild(grp);
+  });
+  s.appendChild(el("circle",{id:"marble",r:Math.max(2,fs*0.35),fill:"var(--brass-lite)",opacity:0}));
+}
+
+(function dragging(){
+  const s = $("scene"); let active = null;
+  s.addEventListener("pointerdown", e=>{
+    if (S.launched) return;
+    const gEl = e.target.closest("g[data-i]"); if (!gEl) return;
+    active = +gEl.dataset.i; s.setPointerCapture(e.pointerId); move(e);
+  });
+  s.addEventListener("pointermove", e=>{ if (active!=null) move(e); });
+  s.addEventListener("pointerup", ()=>{ active=null; });
+  s.addEventListener("pointercancel", ()=>{ active=null; });
+  function move(e){
+    const box = s.getBoundingClientRect();
+    let y = VIEW.yMax - ((e.clientY - box.top)/box.height*VIEW.H)/100;
+    y = Math.max(0, Math.min(y, 2.0));
+    S.heights[active] = rd(y,3);
+    document.querySelector("input[data-i='"+active+"']").value = (y*100).toFixed(1);
+    save(); draw(); e.preventDefault();
+  }
+})();
+
+/* ---------- launch ---------- */
+function lockAll(){
+  document.querySelectorAll("#rows input, [data-b]").forEach(i=> i.disabled = true);
+  $("launch").disabled = true;
+}
+function showResults(){
+  let pass=0, clip=0;
+  S.status.forEach((st,i)=>{
+    const cls = st==="pass"?"t-pass":st==="clip"?"t-clip":"t-miss";
+    const word = st==="pass"?"through":st==="clip"?"hit the rim":"missed";
+    $("res"+i).innerHTML = "<span class='tag "+cls+"'>"+word+"</span>";
+    if (st==="pass") pass++; else if (st==="clip") clip++;
+  });
+  const miss = N-pass-clip;
+  $("verdict").textContent = pass+" through, "+clip+" rim, "+miss+" missed";
+  $("dMsg").className = "msg ok";
+  $("dMsg").textContent = "Launched " + new Date(S.launchedAt).toLocaleString() + ". Your results are recorded. Finish Part E, then turn it in.";
+}
+function launch(){
+  if (S.launched) return;
+  const err = $("dMsg");
+  if (!S.name.trim() || !S.period){ err.className="msg err"; err.textContent = "Enter your name and period at the top before you launch."; $("name").focus(); return; }
+  const empty = S.heights.map((v,i)=>v==null?i+1:null).filter(Boolean);
+  if (empty.length){ err.className="msg err"; err.textContent = "Station"+(empty.length>1?"s ":" ")+empty.join(", ")+" still need"+(empty.length>1?"":"s")+" a height."; $("verdict").textContent = "Every ring needs a height before you can fire."; return; }
+  if (!window.confirm("You get one launch. Your ring heights and Part B answers will lock. Launch now?")) return;
+  S.status = S.heights.map((h,i)=> grade(h, P.targets[i]));
+  S.launched = true; S.launchedAt = Date.now(); save();
+  lockAll(); draw(); err.textContent = "";
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const dur = reduce ? 0 : 2200, marble = $("marble"), t0 = performance.now();
+  function frame(now){
+    const f = dur ? Math.min((now-t0)/dur, 1) : 1;
+    const t = P.tLand*f, x = P.vx*t, y = P.h0 + P.vy*t - 0.5*G*t*t;
+    marble.setAttribute("cx", SX(x)); marble.setAttribute("cy", SY(y)); marble.setAttribute("opacity", 1);
+    if (f<1) anim = requestAnimationFrame(frame); else showResults();
+  }
+  anim = requestAnimationFrame(frame);
+}
+$("launch").addEventListener("click", launch);
+
+/* ---------- turn in ---------- */
+function buildResults(){
+  const b = S.b, L = [];
+  L.push("Given: v0 = "+P.v0.toFixed(2)+" m/s, theta = "+P.thetaDeg.toFixed(1)+" deg, h0 = "+P.h0.toFixed(3)+" m, g = 9.81 m/s^2");
+  L.push("Assigned station: "+(P.mine+1)+" (x = "+P.xs[P.mine].toFixed(2)+" m)");
+  L.push("");
+  L.push("PART B");
+  L.push("v0x = "+(b.vx||"-")+" m/s");
+  L.push("v0y = "+(b.vy||"-")+" m/s");
+  L.push("t to station = "+(b.t||"-")+" s");
+  L.push("Height, method 1 = "+(b.m1||"-")+" m");
+  L.push("Height, method 2 = "+(b.m2||"-")+" m");
+  L.push("");
+  L.push("PART C (ring heights, cm)");
+  P.xs.forEach((x,i)=>{
+    const h = S.heights[i];
+    const st = S.status ? {pass:"through",clip:"rim",miss:"missed"}[S.status[i]] : "not launched";
+    L.push("Stn "+(i+1)+(i===P.mine?"*":" ")+"  x = "+x.toFixed(2)+" m  height = "+(h==null?"-":(h*100).toFixed(1))+" cm  "+st);
+  });
+  L.push("");
+  if (S.launched){
+    const c = {pass:0,clip:0,miss:0}; S.status.forEach(s=>c[s]++);
+    L.push("PART D: "+c.pass+" through, "+c.clip+" rim, "+c.miss+" missed");
+    L.push("Launched: "+new Date(S.launchedAt).toISOString());
+  } else L.push("PART D: not launched");
+  return L.join("\n");
+}
+function buildAnalysis(){
+  const e = S.e;
+  return "E1: "+(e.e1||"").trim()+"\n\nE2: "+(e.e2||"").trim()+"\n\nE3: "+(e.e3||"").trim();
+}
+function buildAll(){
+  return "Projectile Ring Challenge, makeup\nName: "+S.name.trim()+"\nPeriod: "+S.period+"\nProblem code: "+S.code+"\n\n"+buildResults()+"\n\nPART E\n"+buildAnalysis();
+}
+function refreshSummary(){ $("summaryBox").value = buildAll(); }
+$("summaryWrap").addEventListener("toggle", refreshSummary);
+
+function checkReady(){
+  const m = $("sendMsg");
+  if (!S.name.trim() || !S.period){ m.className="msg err"; m.textContent="Enter your name and period at the top first."; return false; }
+  if (!S.launched){ m.className="msg err"; m.textContent="Launch first (Part D). Your results can’t be sent until the marble has flown."; return false; }
+  const blank = ["e1","e2","e3"].filter(k=>!(S.e[k]||"").trim());
+  if (blank.length){ m.className="msg err"; m.textContent="Answer "+blank.map(k=>k.toUpperCase()).join(", ")+" in Part E before you send."; return false; }
+  return true;
+}
+async function copyText(){
+  const txt = buildAll(); refreshSummary();
+  try { await navigator.clipboard.writeText(txt); return true; }
+  catch(e){ $("summaryWrap").open = true; $("summaryBox").select(); return false; }
+}
+$("copy").addEventListener("click", async ()=>{
+  const ok = await copyText();
+  const m = $("sendMsg"); m.className = "msg ok";
+  m.textContent = ok ? "Copied. Paste it wherever Mr. Comella asks." : "Your browser blocked copying. The text is selected below; press Ctrl+C (or ⌘+C).";
+});
+$("send").addEventListener("click", async ()=>{
+  if (!checkReady()) return;
+  const m = $("sendMsg");
+  if (!FORM.url){
+    await copyText();
+    m.className="msg err"; m.textContent="The form link isn’t set up yet. Your results were copied; email them to Mr. Comella and tell him the form link is missing.";
+    return;
+  }
+  const E = FORM.entries, q = new URLSearchParams();
+  q.set("usp","pp_url");
+  const put = (k,v)=>{ if (E[k]) q.set(E[k], v); };
+  put("name", S.name.trim()); put("period", S.period); put("code", S.code);
+  put("results", buildResults()); put("analysis", buildAnalysis());
+  const allMapped = ["name","period","code","results","analysis"].every(k=>E[k]);
+  if (!allMapped) await copyText();
+  window.open(FORM.url + "?" + q.toString(), "_blank", "noopener");
+  m.className="msg ok";
+  m.textContent = allMapped
+    ? "The form opened in a new tab with your results filled in. Upload photos of Parts A and B, then press Submit in the form."
+    : "The form opened in a new tab. Your results were also copied; paste them into the form, upload photos of Parts A and B, and submit.";
+});
+
+/* ---------- start ---------- */
+drawRows(); draw();
+if (S.launched && S.status){ lockAll(); showResults(); }
+})();
+</script>
+</div>
+</body>
+</html>
